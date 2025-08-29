@@ -46,17 +46,6 @@ async function initializeDashboard() {
     try {
         console.log('🚀 Initializing Backend Manager Dashboard...');
         
-        // Check authentication
-        const user = firebase.auth().currentUser;
-        if (!user) {
-            console.log('❌ No authenticated user, redirecting to login...');
-            window.location.href = './index.html';
-            return;
-        }
-        
-        currentUser = user;
-        console.log('✅ User authenticated:', user.email);
-        
         // Update user info
         updateUserInfo();
         
@@ -1014,7 +1003,7 @@ async function saveSettings() {
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
         firebase.auth().signOut().then(() => {
-            window.location.href = '../Superadmin/superadmin_login.html';
+            window.location.href = '../ARCstaff/index.html';
         }).catch((error) => {
             console.error('Logout error:', error);
         });
@@ -1025,8 +1014,17 @@ function logout() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 DOM loaded, initializing Backend Manager Dashboard...');
     
-    // Initialize dashboard
-    initializeDashboard();
+    // Set up authentication state listener
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            console.log('✅ User authenticated:', user.email);
+            currentUser = user;
+            initializeDashboard();
+        } else {
+            console.log('❌ No authenticated user, redirecting to staff login...');
+            window.location.href = '../ARCstaff/index.html';
+        }
+    });
     
     // Initialize settings
     initializeSettings();
