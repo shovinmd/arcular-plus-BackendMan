@@ -1024,17 +1024,39 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Firebase SDK loaded, setting up auth listener...');
     
     // Set up authentication state listener
-    firebase.auth().onAuthStateChanged(function(user) {
+    firebase.auth().onAuthStateChanged(async function(user) {
         console.log('🔐 Auth state changed:', user ? 'User logged in' : 'No user');
         
         if (user) {
             console.log('✅ User authenticated:', user.email);
             currentUser = user;
             
-            // Check if user is a Backend Manager
-            const staffType = localStorage.getItem('staff_type');
-            if (staffType !== 'backend_manager') {
-                console.log('❌ User is not a Backend Manager, redirecting to staff login...');
+            // Check if user is a Backend Manager by verifying with backend
+            try {
+                const token = await user.getIdToken();
+                const response = await fetch('https://arcular-plus-backend.onrender.com/staff/api/staff/profile/' + user.uid, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const staffProfile = await response.json();
+                    if (staffProfile.staffType !== 'backend_manager') {
+                        console.log('❌ User is not a Backend Manager, redirecting to staff login...');
+                        setTimeout(() => {
+                            window.location.href = 'https://arcular-plus-staffs.vercel.app/';
+                        }, 100);
+                        return;
+                    }
+                    console.log('✅ User verified as Backend Manager');
+                } else {
+                    console.log('❌ Could not verify staff type, redirecting to staff login...');
+                    setTimeout(() => {
+                        window.location.href = 'https://arcular-plus-staffs.vercel.app/';
+                    }, 100);
+                    return;
+                }
+            } catch (error) {
+                console.error('❌ Error verifying staff type:', error);
                 setTimeout(() => {
                     window.location.href = 'https://arcular-plus-staffs.vercel.app/';
                 }, 100);
