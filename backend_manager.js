@@ -50,7 +50,7 @@ async function initializeDashboard() {
         const user = firebase.auth().currentUser;
         if (!user) {
             console.log('❌ No authenticated user, redirecting to login...');
-            window.location.href = '../Superadmin/superadmin_login.html';
+            window.location.href = './index.html';
             return;
         }
         
