@@ -1031,39 +1031,19 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('✅ User authenticated:', user.email);
             currentUser = user;
             
-            // Check if user is a Backend Manager by verifying with backend
-            try {
-                const token = await user.getIdToken();
-                const response = await fetch('https://arcular-plus-backend.onrender.com/api/staff/profile/' + user.uid, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
-                if (response.ok) {
-                    const staffProfile = await response.json();
-                    if (staffProfile.staffType !== 'backend_manager') {
-                        console.log('❌ User is not a Backend Manager, redirecting to staff login...');
-                        setTimeout(() => {
-                            window.location.href = 'https://arcular-plus-staffs.vercel.app/';
-                        }, 100);
-                        return;
-                    }
-                    console.log('✅ User verified as Backend Manager');
-                } else {
-                    console.log('❌ Could not verify staff type, redirecting to staff login...');
-                    setTimeout(() => {
-                        window.location.href = 'https://arcular-plus-staffs.vercel.app/';
-                    }, 100);
-                    return;
-                }
-            } catch (error) {
-                console.error('❌ Error verifying staff type:', error);
+            // Check if user is a Backend Manager by checking localStorage first
+            const storedStaffType = localStorage.getItem('staffType');
+            console.log('🔍 Stored staff type:', storedStaffType);
+            
+            if (storedStaffType === 'backend_manager') {
+                console.log('✅ User verified as Backend Manager (from localStorage)');
+            } else {
+                console.log('❌ User is not a Backend Manager, redirecting to staff login...');
                 setTimeout(() => {
                     window.location.href = 'https://arcular-plus-staffs.vercel.app/';
                 }, 100);
                 return;
             }
-            
-            console.log('✅ User verified as Backend Manager');
             
             // Hide loading state and show dashboard
             document.getElementById('loadingState').style.display = 'none';
