@@ -1003,7 +1003,7 @@ async function saveSettings() {
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
         firebase.auth().signOut().then(() => {
-            window.location.href = '../ARCstaff/index.html';
+            window.location.href = 'https://arcular-plus-staffs.vercel.app/';
         }).catch((error) => {
             console.error('Logout error:', error);
         });
@@ -1014,16 +1014,50 @@ function logout() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 DOM loaded, initializing Backend Manager Dashboard...');
     
+    // Check if Firebase is properly initialized
+    if (typeof firebase === 'undefined') {
+        console.error('❌ Firebase SDK not loaded');
+        showErrorMessage('Firebase SDK not loaded. Please refresh the page.');
+        return;
+    }
+    
+    console.log('✅ Firebase SDK loaded, setting up auth listener...');
+    
     // Set up authentication state listener
     firebase.auth().onAuthStateChanged(function(user) {
+        console.log('🔐 Auth state changed:', user ? 'User logged in' : 'No user');
+        
         if (user) {
             console.log('✅ User authenticated:', user.email);
             currentUser = user;
+            
+            // Check if user is a Backend Manager
+            const staffType = localStorage.getItem('staff_type');
+            if (staffType !== 'backend_manager') {
+                console.log('❌ User is not a Backend Manager, redirecting to staff login...');
+                setTimeout(() => {
+                    window.location.href = 'https://arcular-plus-staffs.vercel.app/';
+                }, 100);
+                return;
+            }
+            
+            console.log('✅ User verified as Backend Manager');
+            
+            // Hide loading state and show dashboard
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('dashboardContent').style.display = 'block';
+            
             initializeDashboard();
         } else {
             console.log('❌ No authenticated user, redirecting to staff login...');
-            window.location.href = '../ARCstaff/index.html';
+            // Add a small delay to ensure the redirect happens
+            setTimeout(() => {
+                window.location.href = 'https://arcular-plus-staffs.vercel.app/';
+            }, 100);
         }
+    }, function(error) {
+        console.error('❌ Auth state listener error:', error);
+        showErrorMessage('Authentication error. Please refresh the page.');
     });
     
     // Initialize settings
