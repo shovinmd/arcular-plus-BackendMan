@@ -1034,7 +1034,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check if user is a Backend Manager by verifying with backend
             try {
                 const token = await user.getIdToken();
-                const response = await fetch('https://arcular-plus-backend.onrender.com/staff/api/staff/profile/' + user.uid, {
+                const response = await fetch('https://arcular-plus-backend.onrender.com/api/staff/profile/' + user.uid, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
