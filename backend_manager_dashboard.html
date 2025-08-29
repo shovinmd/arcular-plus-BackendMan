@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcular+ Backend Manager Dashboard</title>
+    <link rel="stylesheet" href="backend_manager_styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../ARCstaff/logo1.png">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <!-- Loading State -->
+    <div id="loadingState" class="loading-state">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+        </div>
+        <p>Loading your backend manager dashboard...</p>
+        <div class="loading-progress">
+            <div class="progress-bar"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div id="dashboardContent" class="dashboard-container" style="display: none;">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <img src="../ARCstaff/logo1.png" alt="Arcular+ Logo" class="logo">
+                <div class="header-title">
+                    <h1>Backend Manager Dashboard</h1>
+                    <p class="subtitle">Data Management & System Monitoring</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="user-details">
+                        <span id="userName" class="user-name">Backend Manager</span>
+                        <span id="userEmail" class="user-email">manager@arcular.com</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="refreshBtn" class="refresh-btn" title="Refresh Dashboard">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button id="settingsBtn" class="settings-btn" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button id="logoutBtn" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Layout -->
+        <div class="dashboard-layout">
+            <!-- Left Sidebar - Navigation -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h3>Backend Management</h3>
+                </div>
+                
+                <nav class="sidebar-nav">
+                    <div class="nav-item active" data-section="overview">
+                        <i class="fas fa-chart-line"></i>
+                        <span>System Overview</span>
+                    </div>
+                    
+                    <div class="nav-item" data-section="rejections">
+                        <i class="fas fa-ban"></i>
+                        <span>Staff Rejections</span>
+                        <div class="notification-badge" id="rejectionCount">0</div>
+                    </div>
+                    
+                    <div class="nav-item" data-section="data-cleanup">
+                        <i class="fas fa-broom"></i>
+                        <span>Data Cleanup</span>
+                    </div>
+                    
+                    <div class="nav-item" data-section="system-logs">
+                        <i class="fas fa-file-alt"></i>
+                        <span>System Logs</span>
+                    </div>
+                    
+                    <div class="nav-item" data-section="user-management">
+                        <i class="fas fa-users"></i>
+                        <span>User Management</span>
+                    </div>
+                    
+                    <div class="nav-item" data-section="backup-restore">
+                        <i class="fas fa-database"></i>
+                        <span>Backup & Restore</span>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <!-- System Overview Section -->
+                <div id="overviewSection" class="content-section active">
+                    <div class="section-header">
+                        <h2>System Overview</h2>
+                        <p>Real-time monitoring of system health and performance</p>
+                    </div>
+                    
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="totalUsers">0</h3>
+                                <p>Total Users</p>
+                                <div class="stat-trend positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>+12%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="systemHealth">98%</h3>
+                                <p>System Health</p>
+                                <div class="stat-trend positive">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Healthy</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="databaseSize">2.4GB</h3>
+                                <p>Database Size</p>
+                                <div class="stat-trend neutral">
+                                    <i class="fas fa-minus"></i>
+                                    <span>Stable</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="uptime">99.9%</h3>
+                                <p>System Uptime</p>
+                                <div class="stat-trend positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>+0.1%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="recent-activity">
+                        <div class="section-header">
+                            <h3>Recent System Activity</h3>
+                            <button id="refreshActivityBtn" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div id="activityList" class="activity-list">
+                            <!-- Activity items will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Staff Rejections Section -->
+                <div id="rejectionsSection" class="content-section">
+                    <div class="section-header">
+                        <h2>Staff Rejections</h2>
+                        <p>Monitor and manage service provider rejections by staff</p>
+                    </div>
+                    
+                    <div class="rejections-container">
+                        <div class="filters">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="rejectionSearch" placeholder="Search rejections...">
+                            </div>
+                            <select id="rejectionTypeFilter" class="filter-select">
+                                <option value="all">All Types</option>
+                                <option value="hospital">Hospitals</option>
+                                <option value="doctor">Doctors</option>
+                                <option value="nurse">Nurses</option>
+                                <option value="lab">Labs</option>
+                                <option value="pharmacy">Pharmacies</option>
+                            </select>
+                            <select id="rejectionStatusFilter" class="filter-select">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending Cleanup</option>
+                                <option value="cleaned">Cleaned Up</option>
+                                <option value="restored">Restored</option>
+                            </select>
+                        </div>
+                        
+                        <div id="rejectionsList" class="rejections-list">
+                            <!-- Rejections will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Cleanup Section -->
+                <div id="dataCleanupSection" class="content-section">
+                    <div class="section-header">
+                        <h2>Data Cleanup</h2>
+                        <p>Manage and clean up rejected user data to prevent conflicts</p>
+                    </div>
+                    
+                    <div class="cleanup-actions">
+                        <div class="action-card">
+                            <div class="action-header">
+                                <i class="fas fa-broom"></i>
+                                <h3>Cleanup Rejected Users</h3>
+                            </div>
+                            <p>Remove rejected service provider data from the system to prevent registration conflicts.</p>
+                            <button class="btn btn-warning" onclick="initiateDataCleanup()">
+                                <i class="fas fa-play"></i> Start Cleanup
+                            </button>
+                        </div>
+                        
+                        <div class="action-card">
+                            <div class="action-header">
+                                <i class="fas fa-archive"></i>
+                                <h3>Archive Old Data</h3>
+                            </div>
+                            <p>Archive old user data and system logs to optimize performance.</p>
+                            <button class="btn btn-info" onclick="initiateDataArchiving()">
+                                <i class="fas fa-archive"></i> Archive Data
+                            </button>
+                        </div>
+                        
+                        <div class="action-card">
+                            <div class="action-header">
+                                <i class="fas fa-chart-bar"></i>
+                                <h3>Cleanup Analytics</h3>
+                            </div>
+                            <p>View analytics and reports on data cleanup operations.</p>
+                            <button class="btn btn-primary" onclick="viewCleanupAnalytics()">
+                                <i class="fas fa-chart-bar"></i> View Analytics
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="cleanup-history">
+                        <h3>Recent Cleanup Operations</h3>
+                        <div id="cleanupHistoryList" class="history-list">
+                            <!-- Cleanup history will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Logs Section -->
+                <div id="systemLogsSection" class="content-section">
+                    <div class="section-header">
+                        <h2>System Logs</h2>
+                        <p>Monitor system logs and error reports</p>
+                    </div>
+                    
+                    <div class="logs-container">
+                        <div class="log-filters">
+                            <select id="logLevelFilter" class="filter-select">
+                                <option value="all">All Levels</option>
+                                <option value="error">Errors</option>
+                                <option value="warning">Warnings</option>
+                                <option value="info">Info</option>
+                                <option value="debug">Debug</option>
+                            </select>
+                            <select id="logTimeFilter" class="filter-select">
+                                <option value="1h">Last Hour</option>
+                                <option value="24h">Last 24 Hours</option>
+                                <option value="7d">Last 7 Days</option>
+                                <option value="30d">Last 30 Days</option>
+                            </select>
+                            <button id="exportLogsBtn" class="btn btn-secondary">
+                                <i class="fas fa-download"></i> Export Logs
+                            </button>
+                        </div>
+                        
+                        <div id="logsList" class="logs-list">
+                            <!-- System logs will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Management Section -->
+                <div id="userManagementSection" class="content-section">
+                    <div class="section-header">
+                        <h2>User Management</h2>
+                        <p>Manage system users and access permissions</p>
+                    </div>
+                    
+                    <div class="user-management-container">
+                        <div class="management-actions">
+                            <button class="btn btn-primary" onclick="createNewUser()">
+                                <i class="fas fa-user-plus"></i> Create User
+                            </button>
+                            <button class="btn btn-secondary" onclick="bulkUserOperations()">
+                                <i class="fas fa-users-cog"></i> Bulk Operations
+                            </button>
+                            <button class="btn btn-info" onclick="exportUserData()">
+                                <i class="fas fa-download"></i> Export Users
+                            </button>
+                        </div>
+                        
+                        <div class="user-filters">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="userSearch" placeholder="Search users...">
+                            </div>
+                            <select id="userRoleFilter" class="filter-select">
+                                <option value="all">All Roles</option>
+                                <option value="admin">Admin</option>
+                                <option value="staff">Staff</option>
+                                <option value="manager">Manager</option>
+                                <option value="supervisor">Supervisor</option>
+                            </select>
+                            <select id="userStatusFilter" class="filter-select">
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="suspended">Suspended</option>
+                            </select>
+                        </div>
+                        
+                        <div id="usersList" class="users-list">
+                            <!-- Users will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup & Restore Section -->
+                <div id="backupRestoreSection" class="content-section">
+                    <div class="section-header">
+                        <h2>Backup & Restore</h2>
+                        <p>Manage database backups and system restoration</p>
+                    </div>
+                    
+                    <div class="backup-actions">
+                        <div class="action-card">
+                            <div class="action-header">
+                                <i class="fas fa-download"></i>
+                                <h3>Create Backup</h3>
+                            </div>
+                            <p>Create a complete backup of the current database and system state.</p>
+                            <button class="btn btn-success" onclick="createBackup()">
+                                <i class="fas fa-download"></i> Create Backup
+                            </button>
+                        </div>
+                        
+                        <div class="action-card">
+                            <div class="action-header">
+                                <i class="fas fa-upload"></i>
+                                <h3>Restore Backup</h3>
+                            </div>
+                            <p>Restore the system from a previous backup point.</p>
+                            <button class="btn btn-warning" onclick="restoreBackup()">
+                                <i class="fas fa-upload"></i> Restore Backup
+                            </button>
+                        </div>
+                        
+                        <div class="action-card">
+                            <div class="action-header">
+                                <i class="fas fa-clock"></i>
+                                <h3>Auto Backup</h3>
+                            </div>
+                            <p>Configure automatic backup schedules and retention policies.</p>
+                            <button class="btn btn-info" onclick="configureAutoBackup()">
+                                <i class="fas fa-cog"></i> Configure
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="backup-history">
+                        <h3>Backup History</h3>
+                        <div id="backupHistoryList" class="history-list">
+                            <!-- Backup history will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Backend Manager Settings</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h4>System Preferences</h4>
+                    <div class="form-group">
+                        <label for="autoCleanup">Auto Cleanup Rejected Users</label>
+                        <select id="autoCleanup">
+                            <option value="disabled">Disabled</option>
+                            <option value="24h">After 24 Hours</option>
+                            <option value="48h">After 48 Hours</option>
+                            <option value="7d">After 7 Days</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="backupFrequency">Backup Frequency</label>
+                        <select id="backupFrequency">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h4>Notification Preferences</h4>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="rejectionNotifications" checked>
+                            Rejection Notifications
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="systemAlerts" checked>
+                            System Alerts
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="backupNotifications" checked>
+                            Backup Notifications
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveSettingsBtn" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <button id="cancelSettingsBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container"></div>
+
+    <!-- Scripts -->
+    <script src="backend_manager.js"></script>
+</body>
+</html>
